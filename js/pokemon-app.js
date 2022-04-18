@@ -17,7 +17,8 @@ let landmarkCount = 0
 let gameState = {
 	points: 0,
 	captured: [],
-	messages: []
+	messages: [],
+	won: false,
 }
 
 // Create an interactive map
@@ -27,10 +28,11 @@ let map = new InteractiveMap({
 	mapCenter: NU_CENTER,
 
 	// Ranges
-	ranges: [500, 200, 90, 1], // must be in reverse order
+	ranges: [50, 50, 90, 1], // must be in reverse order
 
 	initializeMap() {
 		// A good place to load landmarks
+		/*
 		this.loadLandmarks("landmarks-shop-evanston", (landmark) => {
 			// Keep this landmark?
 
@@ -40,17 +42,18 @@ let map = new InteractiveMap({
 			// Only keep this landmark if its a store or amenity, e.g.
 			// return landmark.properties.amenity || landmark.properties.store
 		})
+		*/
 
 		// Create random landmarks
 		// You can also use this to create trails or clusters for the user to find
-		for (var i = 0; i < 10; i++) {
+		for (var i = 0; i < 4; i++) {
 
 			// make a polar offset (radius, theta) 
 			// from the map's center (units are *approximately* meters)
 			let position = clonePolarOffset(NU_CENTER, 400*Math.random() + 300, 20*Math.random())
 			this.createLandmark({
 				pos: position,
-				name: words.getRandomWord(),
+				name: pokemonNames[Math.floor(Math.random()*pokemonNames.length)]
 			})
 		}
 	},
@@ -95,6 +98,7 @@ let map = new InteractiveMap({
 				gameState.captured.push(landmark.name)
 				// Add a message
 				gameState.messages.push(`You captured ${landmark.name} for ${landmark.points} points`)
+				
 			}
 
 		}
@@ -105,6 +109,19 @@ let map = new InteractiveMap({
 		// e.g. (2->1, 0->-1)
 		
 		console.log("exit", landmark.name, newLevel)
+		for (var i = 0; i < 2; i++) {
+			let position = clonePolarOffset(NU_CENTER, 600*Math.random() + 100, 20*Math.random())
+			let filteredPokemon = pokemonNames.filter(name => !gameState.captured.includes(name))
+			if (filteredPokemon.length != 0)
+				map.createLandmark({
+					pos: position,
+					name: filteredPokemon[Math.floor(Math.random()*filteredPokemon.length)]
+				})
+		}
+		if (gameState.captured.length == pokemonNames.length && !gameState.won){
+			gameState.messages.push("You've caught all of the Pokemon!!!!!!")
+			gameState.won = true
+		}
 	},
 	
 	
